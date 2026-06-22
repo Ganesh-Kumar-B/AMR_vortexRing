@@ -1,0 +1,20 @@
+#createVortexRing!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+ideasUnvToFoam vortex_ring_100.unv
+cp -r 0.orig 0
+# runApplication -s createBlockMesh createBoxTurb -createBlockMesh
+
+cd createVortexRing
+wmake
+cd ..
+createVortexRing
+#echo("Copied the 0.orig file to 0")
+
+decomposePar
+
+
+runParallel $(getApplication)
+
+# ------------------------------------------------------------------------------

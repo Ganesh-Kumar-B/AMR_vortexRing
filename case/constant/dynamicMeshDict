@@ -1,0 +1,34 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      dynamicMeshDict;
+}
+
+dynamicFvMesh dynamicRefineFvMesh;
+
+dynamicRefineFvMeshCoeffs
+{
+    refineInterval 1;
+
+    field magVorticity;
+
+    lowerRefineLevel 0.5;
+    upperRefineLevel 4.0;
+
+    unrefineLevel 0.2;
+
+    nBufferLayers 1;
+
+    maxRefinement 2;
+
+    maxCells 50000000;
+
+    correctFluxes
+    (
+        (phi none)
+    );
+
+    dumpLevel true;
+}
