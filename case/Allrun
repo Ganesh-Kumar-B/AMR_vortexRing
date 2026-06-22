@@ -1,20 +1,39 @@
-#createVortexRing!/bin/sh
-cd "${0%/*}" || exit                                # Run from this directory
-. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
-#------------------------------------------------------------------------------
-ideasUnvToFoam vortex_ring_100.unv
-cp -r 0.orig 0
-# runApplication -s createBlockMesh createBoxTurb -createBlockMesh
+#!/bin/sh
 
-cd createVortexRing
+cd "${0%/*}" || exit
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions
+
+# Build custom vortex-ring initialization utility
+
+(
+cd ../utilities/createVortexRing || exit 1
 wmake
-cd ..
+)
+
+# Build custom AMR solver
+
+(
+cd ../solvers/pimpleFoamVortRefine || exit 1
+wmake
+)
+
+# Convert mesh from I-DEAS UNV format
+
+ideasUnvToFoam vortex_ring.unv
+
+# Create initial time directory
+
+rm -rf 0
+cp -r 0.orig 0
+
+# Initialize vortex-ring velocity and vorticity fields
+
 createVortexRing
-#echo("Copied the 0.orig file to 0")
 
-decomposePar
+# Decompose domain for parallel execution
 
+decomposePar -force
 
-runParallel $(getApplication)
+# Run simulation in parallel
 
-# ------------------------------------------------------------------------------
+mpirun --oversubscribe -np 6 pimpleFoamVortRefine -parallel
